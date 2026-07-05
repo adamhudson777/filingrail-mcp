@@ -1,0 +1,232 @@
+openapi: 3.1.0
+info:
+  title: Filingrail — SEC EDGAR API
+  description: >-
+    Structured SEC EDGAR data: company financials, insider trades, 8-K events,
+    13F holdings, and the filings stream. Every financial response includes a
+    source_filing_url tracing back to the exact sec.gov filing. Backed by the
+    Filingrail API on RapidAPI. The end user supplies their own RapidAPI key.
+  version: "1.0.0"
+servers:
+  - url: https://filingrail.p.rapidapi.com
+    description: Filingrail gateway on RapidAPI (proxies to api.hudsonenterprisesllc.com)
+# ---------------------------------------------------------------------------
+# AUTH — configure in the GPT builder as: Authentication → API Key →
+#   Auth Type: API Key
+#   API Key: <the builder's OWN key, OR leave for the end user to paste>
+#   Custom Header Name: X-RapidAPI-Key
+# The X-RapidAPI-Host header is fixed and sent on every request via the
+# securitySchemes/parameters below. Because RapidAPI requires BOTH headers and
+# GPT Actions only injects ONE api-key header, X-RapidAPI-Host is declared as a
+# header parameter with a constant default on each operation.
+# ---------------------------------------------------------------------------
+security:
+  - RapidAPIKey: []
+paths:
+  /v1/search/companies:
+    get:
+      operationId: searchCompanies
+      summary: Resolve a ticker, CIK, or name fragment to an SEC-registered company.
+      parameters:
+        - $ref: '#/components/parameters/RapidAPIHost'
+        - name: q
+          in: query
+          required: true
+          description: Search term — ticker (AAPL), CIK (320193), or name fragment (Apple).
+          schema: { type: string }
+        - name: limit
+          in: query
+          required: false
+          description: Max results (1-100).
+          schema: { type: integer, default: 10, minimum: 1, maximum: 100 }
+      responses:
+        '200':
+          description: Matching companies.
+          content:
+            application/json:
+              schema: { type: object }
+  /v1/filings/recent:
+    get:
+      operationId: getRecentFilings
+      summary: Recent SEC filings, optionally filtered by form type or CIK.
+      parameters:
+        - $ref: '#/components/parameters/RapidAPIHost'
+        - name: form_type
+          in: query
+          required: false
+          description: Filter by SEC form (e.g. 10-K, 10-Q, 8-K, 4, 13F-HR).
+          schema: { type: string }
+        - name: cik
+          in: query
+          required: false
+          description: Filter by company CIK.
+          schema: { type: integer }
+        - name: limit
+          in: query
+          required: false
+          schema: { type: integer, default: 25, minimum: 1, maximum: 500 }
+      responses:
+        '200':
+          description: Filings, newest first.
+          content:
+            application/json:
+              schema: { type: object }
+  /v1/companies/{ticker_or_cik}/financials:
+    get:
+      operationId: getFinancials
+      summary: Latest XBRL-normalized financial statements (income, balance sheet, cash flow) with source_filing_url.
+      parameters:
+        - $ref: '#/components/parameters/RapidAPIHost'
+        - name: ticker_or_cik
+          in: path
+          required: true
+          description: Company ticker (AAPL) or CIK (320193).
+          schema: { type: string }
+        - name: limit
+          in: query
+          required: false
+          schema: { type: integer, default: 4, minimum: 1, maximum: 50 }
+      responses:
+        '200':
+          description: Normalized financial statements.
+          content:
+            application/json:
+              schema: { type: object }
+  /v1/companies/{ticker_or_cik}/financials/history:
+    get:
+      operationId: getFinancialsHistory
+      summary: Historical quarterly or annual financial-statement series.
+      parameters:
+        - $ref: '#/components/parameters/RapidAPIHost'
+        - name: ticker_or_cik
+          in: path
+          required: true
+          schema: { type: string }
+        - name: period
+          in: query
+          required: false
+          description: Q (quarterly) or A (annual).
+          schema: { type: string, enum: [Q, A], default: Q }
+        - name: limit
+          in: query
+          required: false
+          schema: { type: integer, default: 12, minimum: 1, maximum: 100 }
+        - name: statement_type
+          in: query
+          required: false
+          description: Filter to balance_sheet, income_statement, or cash_flow.
+          schema: { type: string }
+        - name: line_item
+          in: query
+          required: false
+          description: Filter to a single line-item key (e.g. revenue, total_assets).
+          schema: { type: string }
+      responses:
+        '200':
+          description: Statement series, oldest to newest.
+          content:
+            application/json:
+              schema: { type: object }
+  /v1/companies/{ticker_or_cik}/insider-trades:
+    get:
+      operationId: getInsiderTrades
+      summary: Insider transactions (Form 4) for a company.
+      parameters:
+        - $ref: '#/components/parameters/RapidAPIHost'
+        - name: ticker_or_cik
+          in: path
+          required: true
+          schema: { type: string }
+        - name: since
+          in: query
+          required: false
+          description: ISO date (YYYY-MM-DD) — only trades on or after this date.
+          schema: { type: string }
+        - name: limit
+          in: query
+          required: false
+          schema: { type: integer, default: 25, minimum: 1, maximum: 500 }
+      responses:
+        '200':
+          description: Insider trades.
+          content:
+            application/json:
+              schema: { type: object }
+  /v1/companies/{ticker_or_cik}/8k-events:
+    get:
+      operationId: get8kEvents
+      summary: 8-K material events with SEC item codes for a company.
+      parameters:
+        - $ref: '#/components/parameters/RapidAPIHost'
+        - name: ticker_or_cik
+          in: path
+          required: true
+          schema: { type: string }
+        - name: since
+          in: query
+          required: false
+          description: ISO date — only events on or after this date.
+          schema: { type: string }
+        - name: limit
+          in: query
+          required: false
+          schema: { type: integer, default: 10, minimum: 1, maximum: 200 }
+      responses:
+        '200':
+          description: 8-K events.
+          content:
+            application/json:
+              schema: { type: object }
+  /v1/institutions/{institution_cik}/13f-holdings:
+    get:
+      operationId: get13fHoldings
+      summary: 13F-HR institutional holdings for an investment manager.
+      parameters:
+        - $ref: '#/components/parameters/RapidAPIHost'
+        - name: institution_cik
+          in: path
+          required: true
+          description: Institution CIK (e.g. 1067983 for Berkshire Hathaway).
+          schema: { type: integer }
+        - name: quarter
+          in: query
+          required: false
+          description: YYYY-Qn (e.g. 2026-Q1). Defaults to latest.
+          schema: { type: string }
+        - name: limit
+          in: query
+          required: false
+          schema: { type: integer, default: 100, minimum: 1, maximum: 5000 }
+      responses:
+        '200':
+          description: Holdings.
+          content:
+            application/json:
+              schema: { type: object }
+  /health:
+    get:
+      operationId: health
+      summary: API liveness check.
+      parameters:
+        - $ref: '#/components/parameters/RapidAPIHost'
+      responses:
+        '200':
+          description: Status.
+          content:
+            application/json:
+              schema: { type: object }
+components:
+  securitySchemes:
+    RapidAPIKey:
+      type: apiKey
+      in: header
+      name: X-RapidAPI-Key
+  parameters:
+    RapidAPIHost:
+      name: X-RapidAPI-Host
+      in: header
+      required: true
+      description: Fixed RapidAPI gateway host. Do not change.
+      schema:
+        type: string
+        default: filingrail.p.rapidapi.com

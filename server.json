@@ -1,0 +1,30 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.adamhudson777/filingrail-mcp",
+  "description": "SEC EDGAR financials, insider trades, 8-K events, and 13F holdings as MCP tools.",
+  "repository": {
+    "url": "https://github.com/adamhudson777/filingrail-mcp",
+    "source": "github"
+  },
+  "version": "0.1.1",
+  "websiteUrl": "https://filingrail.hudsonenterprisesllc.com",
+  "packages": [
+    {
+      "registryType": "pypi",
+      "identifier": "filingrail-mcp",
+      "version": "0.1.1",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "description": "Your RapidAPI key for the Filingrail API. Get one free (50 calls/day, no card) at https://rapidapi.com/hudson-enterprises-llc-hudson-enterprises-llc-default/api/filingrail",
+          "isRequired": true,
+          "format": "string",
+          "isSecret": true,
+          "name": "RAPIDAPI_KEY"
+        }
+      ]
+    }
+  ]
+}

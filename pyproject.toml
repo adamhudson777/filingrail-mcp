@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "filingrail-mcp"
+version = "0.1.1"
+description = "MCP server for the Filingrail SEC EDGAR API. Drop into Claude Desktop, Cursor, Continue, or any MCP-compatible agent."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+  { name = "Hudson Enterprises LLC", email = "support@hudsonenterprisesllc.com" }
+]
+keywords = ["mcp", "model-context-protocol", "sec", "edgar", "filings", "financial-data", "claude", "cursor", "rapidapi"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Topic :: Office/Business :: Financial",
+]
+dependencies = [
+  "filingrail>=0.1.0",
+  "mcp>=1.0.0",
+]
+
+[project.scripts]
+filingrail-mcp = "filingrail_mcp.server:main"
+
+[project.urls]
+Homepage = "https://filingrail.hudsonenterprisesllc.com"
+Repository = "https://github.com/adamhudson777/filingrail-mcp"
+"Filingrail API" = "https://rapidapi.com/hudson-enterprises-llc-hudson-enterprises-llc-default/api/filingrail"
+
+[tool.setuptools.packages.find]
+where = ["src"]

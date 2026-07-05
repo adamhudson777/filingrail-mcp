@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "filingrail": {
+      "command": "filingrail-mcp",
+      "env": {
+        "RAPIDAPI_KEY": "YOUR_RAPIDAPI_KEY_HERE"
+      }
+    }
+  }
+}
