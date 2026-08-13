@@ -138,7 +138,9 @@ def get_insider_trades(ticker_or_cik: str, since: Optional[str] = None, limit: i
         since: ISO date (YYYY-MM-DD) — only trades on or after this date
         limit: max trades (1-500, default 25)
 
-    Returns: list of trades — insider_name, transaction_date, code, shares, price, USD value
+    Returns: list of trades — insider_name, transaction_date, code, shares, price, USD value,
+        plus filing_url: a direct link to the Form 4 on sec.gov that the trade came from, so
+        any figure can be verified against the original filing.
     """
     with _client() as c:
         return [{
@@ -152,6 +154,8 @@ def get_insider_trades(ticker_or_cik: str, since: Optional[str] = None, limit: i
             "price_per_share": t.price_per_share,
             "total_value_usd": t.total_value_usd,
             "shares_owned_after": t.shares_owned_after,
+            "accession_number": t.accession_number,
+            "filing_url": t.filing_url,
         } for t in c.get_insider_trades(ticker_or_cik, since=since, limit=limit)]
 
 
@@ -164,7 +168,9 @@ def get_8k_events(ticker_or_cik: str, since: Optional[str] = None, limit: int = 
         since: ISO date — only events on or after this date
         limit: max events (1-200, default 10)
 
-    Returns: list of events — event_date, item_codes (e.g. ["5.02", "9.01"]), descriptions
+    Returns: list of events — event_date, item_codes (e.g. ["5.02", "9.01"]), descriptions,
+        plus filing_url: a direct link to the 8-K on sec.gov that the event came from, so the
+        event can be read in full rather than taken on trust.
     """
     with _client() as c:
         return [{
@@ -173,6 +179,8 @@ def get_8k_events(ticker_or_cik: str, since: Optional[str] = None, limit: int = 
             "item_descriptions": e.item_descriptions,
             "summary": e.summary,
             "has_financial_exhibits": e.has_financial_exhibits,
+            "accession_number": e.accession_number,
+            "filing_url": e.filing_url,
         } for e in c.get_8k_events(ticker_or_cik, since=since, limit=limit)]
 
 
@@ -185,7 +193,9 @@ def get_13f_holdings(institution_cik: int, quarter: Optional[str] = None, limit:
         quarter: YYYY-Qn format (e.g. "2026-Q1"), default latest
         limit: max holdings (1-5000, default 100)
 
-    Returns: list of holdings — issuer_name, CUSIP, value_usd, shares
+    Returns: list of holdings — issuer_name, CUSIP, value_usd, shares, plus filing_url:
+        a direct link to the 13F-HR on sec.gov that the position came from, so each holding
+        can be traced to the quarter's filing it was reported in.
     """
     with _client() as c:
         return [{
@@ -196,6 +206,8 @@ def get_13f_holdings(institution_cik: int, quarter: Optional[str] = None, limit:
             "value_usd": h.value_usd,
             "shares": h.shares,
             "investment_discretion": h.investment_discretion,
+            "accession_number": h.accession_number,
+            "filing_url": h.filing_url,
         } for h in c.get_13f_holdings(institution_cik, quarter=quarter, limit=limit)]
 
 
