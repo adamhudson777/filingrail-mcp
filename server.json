@@ -6,13 +6,13 @@
     "url": "https://github.com/adamhudson777/filingrail-mcp",
     "source": "github"
   },
-  "version": "0.1.1",
+  "version": "0.1.2",
   "websiteUrl": "https://filingrail.hudsonenterprisesllc.com",
   "packages": [
     {
       "registryType": "pypi",
       "identifier": "filingrail-mcp",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "transport": {
         "type": "stdio"
       },
