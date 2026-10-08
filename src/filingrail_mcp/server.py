@@ -23,11 +23,14 @@ from __future__ import annotations
 import os
 from typing import Any, Optional
 
-from mcp.server.fastmcp import FastMCP
+try:  # mcp >= 2.0 (2026-07-28) renamed FastMCP -> MCPServer and moved the module
+    from mcp.server.mcpserver import MCPServer as _ServerClass
+except ImportError:  # mcp 1.x
+    from mcp.server.fastmcp import FastMCP as _ServerClass
 from filingrail import FilingrailClient, FilingrailError
 
 
-mcp = FastMCP("filingrail")
+mcp = _ServerClass("filingrail")
 
 
 def _client() -> FilingrailClient:
